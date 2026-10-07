@@ -1,0 +1,6 @@
+{
+  "name": "Resultados e Reconhecimentos do Mês",
+  "description": "Painel web interativo e gamificado de resultados e reconhecimentos mensais para operação de atendimento técnico.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
