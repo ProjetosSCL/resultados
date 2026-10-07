@@ -11,17 +11,17 @@ interface AvatarPhotoProps {
 
 const sizeClasses = {
   sm: "w-8 h-8 text-xs",
-  md: "w-11 h-11 text-sm font-bold",
-  lg: "w-16 h-16 text-lg font-bold",
-  xl: "w-24 h-24 text-2xl font-black",
-  "2xl": "w-32 h-32 text-3xl font-black",
+  md: "w-10 h-10 text-sm font-semibold",
+  lg: "w-14 h-14 text-base font-bold",
+  xl: "w-20 h-20 text-xl font-bold",
+  "2xl": "w-28 h-28 text-2xl font-bold",
 };
 
 const medalRingClasses = {
-  gold: "ring-4 ring-[#F0C828] ring-offset-2 ring-offset-[#1E281E] shadow-[0_0_20px_rgba(240,200,40,0.5)]",
-  silver: "ring-4 ring-[#C8D2C8] ring-offset-2 ring-offset-[#1E281E] shadow-[0_0_15px_rgba(200,210,200,0.4)]",
-  bronze: "ring-4 ring-[#FF8232] ring-offset-2 ring-offset-[#1E281E] shadow-[0_0_15px_rgba(255,130,50,0.35)]",
-  none: "ring-2 ring-[#007D00]/50",
+  gold: "border-2 border-[#d4af37] shadow-[0_2px_8px_rgba(212,175,55,0.25)]",
+  silver: "border-2 border-[#b0b0b0] shadow-[0_2px_8px_rgba(176,176,176,0.2)]",
+  bronze: "border-2 border-[#c87d55] shadow-[0_2px_8px_rgba(200,125,85,0.2)]",
+  none: "border border-[#3a434d]",
 };
 
 export const AvatarPhoto: React.FC<AvatarPhotoProps> = ({
@@ -37,30 +37,10 @@ export const AvatarPhoto: React.FC<AvatarPhotoProps> = ({
   const ringStyle = medalRingClasses[medalRing];
   const sizeStyle = sizeClasses[size];
 
-  // Gera uma cor de gradiente consistente baseada no nome usando a paleta Stone
-  const generateGradient = (str: string) => {
-    const gradients = [
-      "from-[#00D700] to-[#00461E]",
-      "from-[#008267] to-[#00461E]",
-      "from-[#217D91] to-[#00461E]",
-      "from-[#87FF4B] to-[#007D00]",
-      "from-[#A5FA00] to-[#00461E]",
-      "from-[#235096] to-[#00461E]",
-    ];
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const index = Math.abs(hash) % gradients.length;
-    return gradients[index];
-  };
-
-  const gradient = generateGradient(name || fallbackInitials);
-
   if (src && !imgError) {
     return (
       <div
-        className={`relative inline-block rounded-stone-pill overflow-hidden shrink-0 select-none ${sizeStyle} ${ringStyle} ${className}`}
+        className={`relative inline-block rounded-full overflow-hidden shrink-0 select-none bg-[#1a1f26] ${sizeStyle} ${ringStyle} ${className}`}
       >
         <img
           src={src}
@@ -76,12 +56,11 @@ export const AvatarPhoto: React.FC<AvatarPhotoProps> = ({
 
   return (
     <div
-      className={`relative inline-flex items-center justify-center rounded-stone-pill bg-gradient-to-br ${gradient} text-[#F5FFF5] shrink-0 select-none tracking-wider ${sizeStyle} ${ringStyle} ${className}`}
-      style={{ fontFamily: "var(--font-display)" }}
+      className={`relative inline-flex items-center justify-center rounded-full bg-[#242b33] text-[#e8e8e8] shrink-0 select-none tracking-normal ${sizeStyle} ${ringStyle} ${className}`}
+      style={{ fontFamily: "'Segoe UI', 'Roboto', sans-serif" }}
       title={name}
     >
       <span>{fallbackInitials}</span>
     </div>
   );
 };
-

@@ -1,11 +1,12 @@
 @import "tailwindcss";
 @import "./styles/stone-tokens.css";
+@import "./styles/quixotic-tokens.css";
 
 @layer base {
   body {
-    font-family: var(--font-body);
-    background-color: var(--stone-black);
-    color: var(--stone-gray-0);
+    font-family: var(--font-q);
+    background-color: var(--color-q-page);
+    color: var(--color-q-ink);
   }
 }
 
@@ -28,7 +29,7 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--stone-black);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--stone-green-dark);

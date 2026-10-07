@@ -5,6 +5,8 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Header } from "./components/Header";
+import { PageHead } from "./components/PageHead";
+import { Rail } from "./components/Rail";
 import { Podium } from "./components/Podium";
 import { RankingChart } from "./components/RankingChart";
 import { RankingList } from "./components/RankingList";
@@ -182,7 +184,8 @@ export default function App() {
   }, [rankedItems, currentMetric]);
 
   return (
-    <div className="min-h-screen bg-[#1E281E] text-[#F5FFF5] flex flex-col selection:bg-[#00D700] selection:text-[#00461E]">
+    <div className="min-h-screen bg-q-page p-3 sm:p-5">
+      <div className="mx-auto flex min-h-[calc(100vh-1.5rem)] max-w-[1480px] flex-col rounded-q-frame bg-q-frame p-3 sm:min-h-[calc(100vh-2.5rem)] sm:p-5">
       {/* Toast Notification Stone */}
       {refreshToast && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-[#00461E] border-2 border-[#00D700] text-[#A5FA00] px-4 py-2.5 rounded-stone-pill shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom-5">
@@ -191,20 +194,19 @@ export default function App() {
         </div>
       )}
 
-      {/* Top Header & Navigation */}
+      {/* Top Header & Navigation (Quixotic) */}
       <Header
         viewMode={viewMode}
         onViewModeChange={setViewMode}
+        isLoading={isLoading}
+        isUsingSampleData={isUsingSampleData}
+      />
+
+      <PageHead
         referenceMonth={referenceMonth}
         onReferenceMonthChange={setReferenceMonth}
-        metrics={activeMetrics}
-        activeMetricKey={activeMetricKey}
-        onMetricSelect={setActiveMetricKey}
         onRefresh={() => fetchData()}
         isLoading={isLoading}
-        onOpenSettings={() => setShowSettingsModal(true)}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={handleToggleFullscreen}
       />
 
       {/* Presentation Mode Top Bar (when in Fullscreen) */}
@@ -222,8 +224,19 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      {/* Rail + conteúdo */}
+      <div className="flex flex-1 flex-col gap-4 lg:flex-row">
+        <Rail
+          metrics={activeMetrics}
+          activeMetricKey={activeMetricKey}
+          onMetricSelect={setActiveMetricKey}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={handleToggleFullscreen}
+          onOpenSettings={() => setShowSettingsModal(true)}
+        />
+
+      {/* Main Content Area — TEMPORÁRIO: conteúdo ainda no tema escuro (blocos 2–4) */}
+      <main className="min-w-0 flex-1 rounded-q-card bg-[#1E281E] p-4 text-[#F5FFF5] sm:p-6">
         {/* Banner de Aviso de Erro ou Amostra */}
         {fetchErrors.length > 0 && (
           <div className="mb-6 p-4 rounded-stone-md bg-[#00461E]/80 border-2 border-[#FF8232] text-[#FFA53C] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
@@ -332,22 +345,23 @@ export default function App() {
           </>
         )}
       </main>
+      </div>
 
-      {/* Footer Stone DS */}
-      <footer className="border-t border-[#00461E] bg-[#1E281E] py-6 text-center text-xs text-[#96A096]">
+      {/* Footer */}
+      <footer className="mt-4 py-4 text-center text-xs text-q-muted">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="font-body">© {new Date().getFullYear()} Stone • Resultados e Reconhecimentos do Atendimento Técnico</p>
-          <div className="flex items-center gap-4 text-[#C8D2C8] font-body">
+          <div className="flex items-center gap-4 font-body">
             <button
               onClick={() => setShowSettingsModal(true)}
-              className="hover:text-[#00D700] transition-colors cursor-pointer"
+              className="hover:text-q-green transition-colors cursor-pointer"
             >
               Configurar Planilha
             </button>
             <span>•</span>
             <button
               onClick={handleToggleFullscreen}
-              className="hover:text-[#00D700] transition-colors cursor-pointer"
+              className="hover:text-q-green transition-colors cursor-pointer"
             >
               {isFullscreen ? "Sair da Tela Cheia" : "Tela Cheia"}
             </button>
@@ -365,6 +379,7 @@ export default function App() {
         isUsingSampleData={isUsingSampleData}
         errors={fetchErrors}
       />
+      </div>
     </div>
   );
 }

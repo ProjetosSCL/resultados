@@ -1,9 +1,11 @@
 import React from "react";
 
 /**
- * Stone Design System — Card
- * Suporta os 3 layouts da marca: principal (margem fina), respiro (margem larga),
- * sem moldura (full-bleed). tone controla o fundo.
+ * Design Minimalista — Card
+ * Background: #1a1f26
+ * Border: #3a434d
+ * Radius: 8px
+ * Hover: border #2d9d6e, bg #242b33
  */
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -15,29 +17,20 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function Card({
   layout = "principal",
-  tone = "dark",
   className = "",
   children,
   ...props
 }: CardProps) {
   const layoutStyles: Record<string, string> = {
-    principal: "p-5 sm:p-[30px]",
-    respiro: "p-8 sm:p-[60px]",
+    principal: "p-5 sm:p-6",
+    respiro: "p-6 sm:p-8",
     semMoldura: "p-0",
-  };
-
-  const toneStyles: Record<string, string> = {
-    green: "bg-stone-green text-stone-green-dark border border-stone-green-vibrant/40",
-    dark: "bg-stone-green-dark text-stone-gray-0 border border-stone-green-vibrant/20",
-    light: "bg-stone-gray-0 text-stone-green-dark border border-stone-gray-1",
-    surface: "bg-stone-black text-stone-gray-0 border border-stone-gray-3/30",
-    black: "bg-stone-black text-stone-green-vibrant border border-stone-green-dark-2",
   };
 
   return (
     <div
-      className={`rounded-stone-lg ${layoutStyles[layout] || ""} ${
-        toneStyles[tone] || ""
+      className={`bg-[#1a1f26] border border-[#3a434d] rounded-[8px] transition-all duration-300 hover:border-[#2d9d6e] hover:bg-[#242b33]/90 shadow-[0_2px_8px_rgba(0,0,0,0.3)] ${
+        layoutStyles[layout] || ""
       } ${className}`}
       {...props}
     >

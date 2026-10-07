@@ -1,20 +1,9 @@
 import React from "react";
 
 /**
- * Stone Design System — Typography
- * Display = Gravity (títulos/grandes formatos) | Body = Roobert (parágrafos, UI)
- *
- * Regra de marca: na "forma fixa", use peso único por composição (não misture
- * pesos dentro de uma mesma frase). Na "forma variável", só em caixa alta,
- * no máximo 2 pesos por frase.
+ * Design Minimalista — Typography
+ * Font: 'Segoe UI', 'Roboto', sans-serif
  */
-
-const displayWidths: Record<string, string> = {
-  compressed: "tracking-tighter",
-  condensed: "tracking-tight",
-  normal: "tracking-normal",
-  extended: "tracking-wide",
-};
 
 interface DisplayProps extends React.HTMLAttributes<HTMLElement> {
   as?: React.ElementType;
@@ -26,18 +15,17 @@ interface DisplayProps extends React.HTMLAttributes<HTMLElement> {
 
 export function Display({
   as: Tag = "h1",
-  width = "condensed",
-  uppercase = true,
+  uppercase = false,
   className = "",
   children,
   ...props
 }: DisplayProps) {
   return (
     <Tag
-      className={`font-display font-bold leading-[0.95] ${
-        uppercase ? "uppercase" : "capitalize"
-      } ${displayWidths[width] || ""} ${className}`}
-      style={{ fontFamily: "var(--font-display)" }}
+      className={`font-semibold tracking-tight text-[#e8e8e8] ${
+        uppercase ? "uppercase" : ""
+      } ${className}`}
+      style={{ fontFamily: "'Segoe UI', 'Roboto', -apple-system, sans-serif" }}
       {...props}
     >
       {children}
@@ -68,15 +56,15 @@ export function Text({
     bold: "font-bold",
   };
   const sizeMap: Record<string, string> = {
-    lg: "text-lg",
-    md: "text-base",
-    sm: "text-sm",
-    caption: "text-xs",
+    lg: "text-base",
+    md: "text-sm",
+    sm: "text-xs",
+    caption: "text-[11px]",
   };
   return (
     <Tag
-      className={`font-body ${weightMap[weight]} ${sizeMap[size]} ${className}`}
-      style={{ fontFamily: "var(--font-body)" }}
+      className={`text-[#b0b0b0] ${weightMap[weight]} ${sizeMap[size]} leading-relaxed ${className}`}
+      style={{ fontFamily: "'Segoe UI', 'Roboto', -apple-system, sans-serif" }}
       {...props}
     >
       {children}
