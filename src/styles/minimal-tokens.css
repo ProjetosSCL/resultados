@@ -1,0 +1,224 @@
+/* ============================================
+   PALETA DE CORES - DESIGN MINIMALISTA
+   ============================================ */
+
+:root {
+  /* Cores Principais */
+  --bg-primary: #0f1419;
+  --bg-secondary: #1a1f26;
+  --bg-tertiary: #242b33;
+  
+  /* Verde Muted (substitui neon) */
+  --green-primary: #2d9d6e;
+  --green-secondary: #6b9b7d;
+  --green-light: #8fb399;
+  
+  /* Cinzas e Brancos */
+  --text-primary: #e8e8e8;
+  --text-secondary: #b0b0b0;
+  --text-muted: #808080;
+  --white: #ffffff;
+  
+  /* Bordas */
+  --border-color: #2d9d6e;
+  --border-subtle: #3a434d;
+  
+  /* Efeitos */
+  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --transition-default: all 0.3s ease;
+
+  /* Ranking Muted Metallic */
+  --gold-primary: #d4af37;
+  --gold-bg: rgba(212, 175, 55, 0.15);
+  --silver-primary: #b0b0b0;
+  --silver-bg: rgba(176, 176, 176, 0.15);
+  --bronze-primary: #c87d55;
+  --bronze-bg: rgba(200, 125, 85, 0.15);
+}
+
+/* ============================================
+   BOTÕES MINIMALISTAS
+   ============================================ */
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-default);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background-color: var(--green-primary);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background-color: var(--green-secondary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-subtle);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--green-primary);
+  border: 1px solid var(--green-primary);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(45, 157, 110, 0.1);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.btn-ghost:hover {
+  border-color: var(--green-primary);
+  color: var(--green-primary);
+  background-color: rgba(45, 157, 110, 0.05);
+}
+
+/* ============================================
+   CARDS MINIMALISTAS
+   ============================================ */
+
+.card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 20px;
+  transition: var(--transition-default);
+}
+
+.card:hover {
+  border-color: var(--green-primary);
+  background-color: var(--bg-tertiary);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.card-icon {
+  width: 44px;
+  height: 44px;
+  background-color: var(--bg-tertiary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green-primary);
+  font-size: 20px;
+  border: 1px solid var(--border-subtle);
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.card-content {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
+  margin-top: 16px;
+}
+
+/* ============================================
+   BADGES / LABELS
+   ============================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.badge-success {
+  background-color: rgba(45, 157, 110, 0.15);
+  color: var(--green-primary);
+  border-color: rgba(45, 157, 110, 0.3);
+}
+
+.badge-warning {
+  background-color: rgba(212, 175, 55, 0.15);
+  color: var(--gold-primary);
+  border-color: rgba(212, 175, 55, 0.3);
+}
+
+.badge-silver {
+  background-color: rgba(176, 176, 176, 0.15);
+  color: var(--silver-primary);
+  border-color: rgba(176, 176, 176, 0.3);
+}
+
+.badge-bronze {
+  background-color: rgba(200, 125, 85, 0.15);
+  color: var(--bronze-primary);
+  border-color: rgba(200, 125, 85, 0.3);
+}
+
+.badge-info {
+  background-color: rgba(33, 150, 243, 0.15);
+  color: #2196f3;
+  border-color: rgba(33, 150, 243, 0.3);
+}
+
+/* ============================================
+   INPUTS
+   ============================================ */
+
+.input-minimal {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  transition: var(--transition-default);
+}
+
+.input-minimal:focus {
+  outline: none;
+  border-color: var(--green-primary);
+  background-color: var(--bg-tertiary);
+}
+
+.input-minimal::placeholder {
+  color: var(--text-muted);
+}
