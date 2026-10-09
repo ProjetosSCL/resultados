@@ -288,9 +288,50 @@ export default function App() {
                   <span>Tentar novamente</span>
                 </button>
               </div>
+            ) : isLoading ? (
+              <div className="flex flex-col items-center justify-center rounded-q-card bg-q-card py-20 lg:col-span-12 shadow-xs border border-q-line my-4">
+                <div className="mb-4 size-11 animate-spin rounded-full border-4 border-q-green-tint border-t-q-green" />
+                <p className="m-0 text-sm font-bold text-q-ink">Sincronizando com o Supabase...</p>
+                <p className="m-0 mt-1 text-xs text-q-muted">Carregando métricas e fotos em alta resolução</p>
+              </div>
             ) : (
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-                {/* Destaque do Mês (cartão verde) */}
+                {/* Abas de categoria */}
+                <div className="lg:col-span-12 flex items-center gap-2 overflow-x-auto pb-1">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-q-card p-1.5 border border-q-line shadow-xs">
+                    {activeMetrics.map((metric) => {
+                      const active = metric.key === activeMetricKey;
+                      return (
+                        <button
+                          key={metric.key}
+                          onClick={() => setActiveMetricKey(metric.key)}
+                          className={`flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-xs sm:text-sm font-bold transition-colors cursor-pointer ${
+                            active
+                              ? "bg-q-green text-white shadow-xs"
+                              : "text-q-muted hover:text-q-ink hover:bg-q-soft"
+                          }`}
+                        >
+                          <span>{metric.shortLabel}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 1. Pódio dos Campeões (no topo, logo abaixo das abas de categoria) */}
+                <div className="lg:col-span-12">
+                  <Podium items={rankedItems} metric={currentMetric} isOperations={isOperations} />
+                </div>
+
+                {/* 2. Demais Posições */}
+                <div className="lg:col-span-5">
+                  <RankingChart items={rankedItems} metric={currentMetric} />
+                </div>
+                <div className="lg:col-span-7">
+                  <RankingList items={rankedItems} metric={currentMetric} isOperations={isOperations} />
+                </div>
+
+                {/* 3. Destaque do Mês */}
                 {hasHighlight && (
                   <div className="lg:col-span-8">
                     <MonthHighlight
@@ -324,26 +365,6 @@ export default function App() {
                     value={`${categoryStats?.totalParticipants || 0} ${isOperations ? "operações" : "angels"}`}
                   />
                 </div>
-
-                {isLoading ? (
-                  <div className="flex flex-col items-center justify-center rounded-q-card bg-q-card py-20 lg:col-span-12 shadow-xs border border-q-line">
-                    <div className="mb-4 size-11 animate-spin rounded-full border-4 border-q-green-tint border-t-q-green" />
-                    <p className="m-0 text-sm font-bold text-q-ink">Sincronizando com o Supabase...</p>
-                    <p className="m-0 mt-1 text-xs text-q-muted">Carregando métricas e fotos em alta resolução</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="lg:col-span-12">
-                      <Podium items={rankedItems} metric={currentMetric} isOperations={isOperations} />
-                    </div>
-                    <div className="lg:col-span-5">
-                      <RankingChart items={rankedItems} metric={currentMetric} />
-                    </div>
-                    <div className="lg:col-span-7">
-                      <RankingList items={rankedItems} metric={currentMetric} isOperations={isOperations} />
-                    </div>
-                  </>
-                )}
               </div>
             )}
           </main>
