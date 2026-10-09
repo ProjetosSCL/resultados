@@ -8,6 +8,7 @@ import {
   Maximize2,
   Minimize2,
   Settings,
+  Tv,
   type LucideIcon,
 } from "lucide-react";
 import { MetricDefinition, MetricKey } from "../types";
@@ -19,6 +20,7 @@ interface RailProps {
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
   onOpenSettings: () => void;
+  onStartPresentation?: () => void;
 }
 
 const METRIC_ICONS: Record<MetricKey, LucideIcon> = {
@@ -68,6 +70,7 @@ export const Rail: React.FC<RailProps> = ({
   isFullscreen,
   onToggleFullscreen,
   onOpenSettings,
+  onStartPresentation,
 }) => {
   const group =
     "flex items-center gap-1 rounded-full bg-q-card p-1.5 lg:flex-col lg:gap-1.5 lg:p-2";
@@ -94,6 +97,14 @@ export const Rail: React.FC<RailProps> = ({
       </div>
 
       <div className={group}>
+        {onStartPresentation && (
+          <RailButton
+            label="Modo Apresentação (Reunião)"
+            onClick={onStartPresentation}
+          >
+            <Tv className="size-5 text-q-green" strokeWidth={2.1} />
+          </RailButton>
+        )}
         <RailButton
           label={isFullscreen ? "Sair da tela cheia" : "Modo reunião (tela cheia)"}
           active={isFullscreen}

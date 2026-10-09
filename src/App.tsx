@@ -13,6 +13,7 @@ import { RankingList } from "./components/RankingList";
 import { MonthHighlight } from "./components/MonthHighlight";
 import { StatCard } from "./components/StatCard";
 import { SheetSettingsModal } from "./components/SheetSettingsModal";
+import { PresentationMode } from "./components/PresentationMode";
 import {
   ViewMode,
   MetricKey,
@@ -36,8 +37,26 @@ import {
 export default function App() {
   // Estado de Visualização
   const [viewMode, setViewMode] = useState<ViewMode>("OPERACOES");
-  const [referenceMonth, setReferenceMonth] = useState<string>("Agosto");
+  const [referenceMonth, setReferenceMonth] = useState<string>(() => {
+    return localStorage.getItem("presentation_month") || "Agosto";
+  });
+  const [referenceYear, setReferenceYear] = useState<string>(() => {
+    return localStorage.getItem("presentation_year") || String(new Date().getFullYear());
+  });
   const [activeMetricKey, setActiveMetricKey] = useState<MetricKey>("CHAMADOS");
+
+  const handleReferenceMonthChange = (month: string) => {
+    setReferenceMonth(month);
+    localStorage.setItem("presentation_month", month);
+  };
+
+  const handleReferenceYearChange = (year: string) => {
+    setReferenceYear(year);
+    localStorage.setItem("presentation_year", year);
+  };
+
+  // Modo Apresentação Interativo para Reunião ao Vivo
+  const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false);
 
   // Armazenamento do ID/URL da planilha no LocalStorage
   const [spreadsheetId, setSpreadsheetId] = useState<string>(() => {
@@ -179,7 +198,39 @@ export default function App() {
     };
   }, [rankedItems, currentMetric]);
 
+  // Inicia Modo Apresentação em tela cheia
+  const handleStartPresentation = () => {
+    setIsPresentationMode(true);
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+  };
+
+  // Sai do Modo Apresentação e restaura tela normal
+  const handleExitPresentation = () => {
+    setIsPresentationMode(false);
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
   const hasHighlight = !!monthHighlight;
+
+  // Se o Modo Apresentação estiver ativo, exibe a experiência de apresentação interativa
+  if (isPresentationMode) {
+    return (
+      <PresentationMode
+        operacoes={operacoes}
+        angels={angels}
+        fotosMap={fotosMap}
+        referenceMonth={referenceMonth}
+        referenceYear={referenceYear}
+        onReferenceMonthChange={handleReferenceMonthChange}
+        onReferenceYearChange={handleReferenceYearChange}
+        onExit={handleExitPresentation}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-q-page p-3 sm:p-5">
@@ -201,9 +252,10 @@ export default function App() {
 
         <PageHead
           referenceMonth={referenceMonth}
-          onReferenceMonthChange={setReferenceMonth}
+          onReferenceMonthChange={handleReferenceMonthChange}
           onRefresh={() => fetchData()}
           isLoading={isLoading}
+          onStartPresentation={handleStartPresentation}
         />
 
         {/* Modo apresentação (tela cheia) */}
@@ -225,6 +277,7 @@ export default function App() {
             isFullscreen={isFullscreen}
             onToggleFullscreen={handleToggleFullscreen}
             onOpenSettings={() => setShowSettingsModal(true)}
+            onStartPresentation={handleStartPresentation}
           />
 
           <main className="min-w-0 flex-1">

@@ -17,7 +17,7 @@ interface RankingChartProps {
   metric: MetricDefinition;
 }
 
-const GREEN = "#108652";
+const GREEN = "var(--color-q-green)";
 const STRIPES = "url(#q-bar-stripes)";
 
 export const RankingChart: React.FC<RankingChartProps> = ({ items, metric }) => {
@@ -92,14 +92,14 @@ export const RankingChart: React.FC<RankingChartProps> = ({ items, metric }) => 
           >
             <defs>
               <pattern id="q-bar-stripes" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                <rect width="7" height="7" fill="#82b19d" />
+                <rect width="7" height="7" fill="var(--color-q-green-stripe)" />
                 <rect width="2" height="7" fill="#ffffff" opacity="0.45" />
               </pattern>
             </defs>
-            <CartesianGrid strokeDasharray="4 4" horizontal={false} vertical stroke="#e3e3e6" />
+            <CartesianGrid strokeDasharray="4 4" horizontal={false} vertical stroke="var(--color-q-line)" />
             <XAxis
               type="number"
-              stroke="#8b8b90"
+              stroke="var(--color-q-muted)"
               fontSize={11}
               tickLine={false}
               axisLine={false}
@@ -131,7 +131,7 @@ export const RankingChart: React.FC<RankingChartProps> = ({ items, metric }) => 
                 );
               }}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(16, 134, 82, 0.06)" }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(0, 125, 0, 0.06)" }} />
             <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={18} animationDuration={600}>
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.rank === 1 ? GREEN : STRIPES} />

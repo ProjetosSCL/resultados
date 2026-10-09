@@ -25,6 +25,7 @@ const PLACES: Record<
     pedestalLabel: string;
     pedestalText: string;
     order: string;
+    tint: string;
   }
 > = {
   1: {
@@ -37,6 +38,7 @@ const PLACES: Record<
     pedestalLabel: "Campeão",
     pedestalText: "text-white/80",
     order: "order-1 md:order-2",
+    tint: "bg-q-podium-1",
   },
   2: {
     label: "2º lugar",
@@ -48,6 +50,7 @@ const PLACES: Record<
     pedestalLabel: "Prata",
     pedestalText: "text-q-green-deep/80",
     order: "order-2 md:order-1",
+    tint: "bg-q-podium-2",
   },
   3: {
     label: "3º lugar",
@@ -59,6 +62,7 @@ const PLACES: Record<
     pedestalLabel: "Bronze",
     pedestalText: "text-q-green-deep/80",
     order: "order-3",
+    tint: "bg-q-podium-3",
   },
 };
 
@@ -91,9 +95,7 @@ const Pillar: React.FC<{
       className={`group cursor-pointer ${cfg.order} flex flex-col justify-end transition-transform duration-300 hover:-translate-y-1`}
     >
       <div
-        className={`relative rounded-3xl p-5 text-center ${
-          place === 1 ? "bg-q-green-tint" : "bg-q-soft"
-        }`}
+        className={`relative rounded-3xl p-5 text-center ${cfg.tint}`}
       >
         <span className="absolute right-4 top-4 text-q-muted/40 transition-colors group-hover:text-q-muted/70">
           {place === 1 ? <Trophy className="size-6" /> : <Medal className="size-5" />}

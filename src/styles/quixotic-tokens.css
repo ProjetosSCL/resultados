@@ -1,26 +1,34 @@
 /* ==========================================================================
-   QUIXOTIC — tokens do tema claro (referência: design-systems/quixotic-dash)
-   Cores amostradas do mock. Coexistem com os tokens Stone (stone-tokens.css).
+   QUIXOTIC — tokens do tema claro (referência: Stone Vibrante)
+   Cores da marca Stone. Coexistem com os tokens Stone (stone-tokens.css).
    ========================================================================== */
 
 @theme {
   /* Superfícies */
-  --color-q-page: #dcdbe0;
-  --color-q-frame: #f2f2f2;
+  --color-q-page: #cfe9bd;
+  --color-q-frame: #f4faee;
   --color-q-card: #ffffff;
-  --color-q-soft: #f4f4f4;
-  --color-q-row: #f7f7f9;
-  --color-q-line: #e6e6e9;
+  --color-q-soft: #edf6e5;
+  --color-q-row: #f3f9ee;
+  --color-q-line: #d9e8cc;
 
-  /* Verde do mock */
-  --color-q-green: #108652;
-  --color-q-green-deep: #0a6b40;
-  --color-q-green-tint: #e0efe8;
-  --color-q-green-stripe: #82b19d;
+  /* Verde da marca */
+  --color-q-green: #007d00;
+  --color-q-green-deep: #005f00;
+  --color-q-green-tint: #e7fbc0;
+  --color-q-green-stripe: #aee05c;
+
+  --color-q-on-green: #ffffff;
+  --color-q-on-frame: #103024;
+  --color-q-on-frame-muted: #66805d;
 
   /* Texto */
-  --color-q-ink: #111111;
-  --color-q-muted: #8b8b90;
+  --color-q-ink: #103024;
+  --color-q-muted: #66805d;
+
+  --color-q-podium-1: #a5fa00;
+  --color-q-podium-2: #bce9a6;
+  --color-q-podium-3: #e9f8dc;
 
   /* Raios */
   --radius-q-frame: 32px;
@@ -38,4 +46,14 @@
     rgb(255 255 255 / 0.45) 0 2px,
     transparent 2px 7px
   );
+}
+
+.bg-q-podium-1 {
+  background-color: var(--color-q-podium-1);
+}
+.bg-q-podium-2 {
+  background-color: var(--color-q-podium-2);
+}
+.bg-q-podium-3 {
+  background-color: var(--color-q-podium-3);
 }
