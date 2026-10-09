@@ -12,7 +12,6 @@ import { RankingChart } from "./components/RankingChart";
 import { RankingList } from "./components/RankingList";
 import { MonthHighlight } from "./components/MonthHighlight";
 import { StatCard } from "./components/StatCard";
-import { SheetSettingsModal } from "./components/SheetSettingsModal";
 import { PresentationMode } from "./components/PresentationMode";
 import {
   ViewMode,
@@ -22,9 +21,13 @@ import {
 } from "./types";
 import { getMetricsForView } from "./utils/metrics";
 import { calculateRanking, calculateMonthHighlight } from "./utils/ranking";
-import { loadAllSheetData } from "./services/sheetsService";
-import { UNIDADE, DEFAULT_SPREADSHEET_ID } from "./config";
-import { Button } from "./components/stone-ds";
+import {
+  SUPABASE_URL,
+  SUPABASE_KEY,
+  loadSupabaseData,
+  formatUpdateDateTime,
+} from "./services/supabaseService";
+import { UNIDADE } from "./config";
 import {
   AlertCircle,
   TrendingUp,
@@ -32,49 +35,62 @@ import {
   Users,
   CheckCircle2,
   Tv,
+  RefreshCw,
 } from "lucide-react";
 
 export default function App() {
   // Estado de Visualização
   const [viewMode, setViewMode] = useState<ViewMode>("OPERACOES");
-  const [referenceMonth, setReferenceMonth] = useState<string>(() => {
-    return localStorage.getItem("presentation_month") || "Agosto";
-  });
-  const [referenceYear, setReferenceYear] = useState<string>(() => {
-    return localStorage.getItem("presentation_year") || String(new Date().getFullYear());
-  });
   const [activeMetricKey, setActiveMetricKey] = useState<MetricKey>("CHAMADOS");
 
-  const handleReferenceMonthChange = (month: string) => {
-    setReferenceMonth(month);
-    localStorage.setItem("presentation_month", month);
-  };
-
-  const handleReferenceYearChange = (year: string) => {
-    setReferenceYear(year);
-    localStorage.setItem("presentation_year", year);
-  };
-
-  // Modo Apresentação Interativo para Reunião ao Vivo
-  const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false);
-
-  // Armazenamento do ID/URL da planilha no LocalStorage
-  const [spreadsheetId, setSpreadsheetId] = useState<string>(() => {
-    return localStorage.getItem("sheets_ranking_id") || DEFAULT_SPREADSHEET_ID;
-  });
-
-  // Dados brutos carregados
+  // Dados do Supabase
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [displayMonth, setDisplayMonth] = useState<string>("");
   const [operacoes, setOperacoes] = useState<OperationRow[]>([]);
   const [angels, setAngels] = useState<AngelRow[]>([]);
   const [fotosMap, setFotosMap] = useState<Map<string, string>>(new Map());
 
-  // Estados de controle de carregamento e feedback
+  // Estados de controle de carregamento, erro e atualização
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [fetchErrors, setFetchErrors] = useState<string[]>([]);
-  const [isUsingSampleData, setIsUsingSampleData] = useState<boolean>(false);
-  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [refreshToast, setRefreshToast] = useState<string | null>(null);
+
+  // Modo Apresentação e Tela Cheia
+  const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+
+  // Função para carregar os dados do Supabase
+  const fetchData = useCallback(async (targetMonth?: string) => {
+    setIsLoading(true);
+    setFetchError(null);
+    try {
+      const result = await loadSupabaseData(targetMonth);
+      setAvailableMonths(result.availableMonths);
+      setSelectedMonth(result.rawMonth);
+      setDisplayMonth(result.displayMonth);
+      setOperacoes(result.operacoes);
+      setAngels(result.angels);
+      setFotosMap(result.fotosMap);
+      setLastUpdated(result.updatedAt);
+
+      setRefreshToast("Dados sincronizados com o Supabase!");
+      setTimeout(() => setRefreshToast(null), 3000);
+    } catch (err: any) {
+      // Se a leitura falhar, mostra mensagem bem visível sem dados antigos
+      setOperacoes([]);
+      setAngels([]);
+      setFetchError(err.message || "Erro inesperado ao consultar o banco Supabase.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Carrega ao montar a página
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   // Lista de métricas disponíveis para o modo atual
   const activeMetrics = useMemo(() => {
@@ -88,34 +104,6 @@ export default function App() {
       setActiveMetricKey(activeMetrics[0].key);
     }
   }, [viewMode, activeMetrics, activeMetricKey]);
-
-  // Função para carregar os dados das 3 abas (OPERAÇÕES, ANGELS, FOTOS)
-  const fetchData = useCallback(async (customId?: string) => {
-    setIsLoading(true);
-    setFetchErrors([]);
-    try {
-      const targetId = customId !== undefined ? customId : spreadsheetId;
-      const result = await loadAllSheetData(targetId);
-
-      setOperacoes(result.operacoes);
-      setAngels(result.angels);
-      setFotosMap(result.fotosMap);
-      setIsUsingSampleData(result.isSampleData);
-      setFetchErrors(result.errors);
-
-      setRefreshToast("Dados sincronizados com a Stone!");
-      setTimeout(() => setRefreshToast(null), 3500);
-    } catch (err: any) {
-      setFetchErrors([err.message || "Erro inesperado ao consultar a planilha."]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [spreadsheetId]);
-
-  // Carrega ao montar a página
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
 
   // Monitora alterações de tela cheia nativa
   useEffect(() => {
@@ -141,18 +129,11 @@ export default function App() {
     }
   };
 
-  // Salva nova URL de planilha
-  const handleSaveSpreadsheet = (newIdOrUrl: string) => {
-    setSpreadsheetId(newIdOrUrl);
-    localStorage.setItem("sheets_ranking_id", newIdOrUrl);
-    fetchData(newIdOrUrl);
-  };
-
-  // Restaura para amostra
-  const handleResetToSample = () => {
-    setSpreadsheetId("");
-    localStorage.removeItem("sheets_ranking_id");
-    fetchData("");
+  // Troca de mês via seletor
+  const handleSelectMonth = (newMonth: string) => {
+    if (newMonth && newMonth !== selectedMonth) {
+      fetchData(newMonth);
+    }
   };
 
   // Métrica ativa atual
@@ -165,12 +146,13 @@ export default function App() {
 
   // Calcula o ranking da categoria ativa
   const rankedItems = useMemo(() => {
-    if (!currentMetric) return [];
+    if (!currentMetric || currentDataset.length === 0) return [];
     return calculateRanking(currentDataset, currentMetric, fotosMap, isOperations);
   }, [currentDataset, currentMetric, fotosMap, isOperations]);
 
   // Calcula todos os rankings de todas as categorias para apurar o "Destaque do Mês"
   const allCategoryRankings = useMemo(() => {
+    if (currentDataset.length === 0) return [];
     return activeMetrics.map((metric) => ({
       metric,
       rankings: calculateRanking(currentDataset, metric, fotosMap, isOperations),
@@ -179,6 +161,7 @@ export default function App() {
 
   // Destaque do mês (quem mais subiu ao pódio)
   const monthHighlight = useMemo(() => {
+    if (allCategoryRankings.length === 0) return null;
     return calculateMonthHighlight(allCategoryRankings, fotosMap, isOperations);
   }, [allCategoryRankings, fotosMap, isOperations]);
 
@@ -223,10 +206,10 @@ export default function App() {
         operacoes={operacoes}
         angels={angels}
         fotosMap={fotosMap}
-        referenceMonth={referenceMonth}
-        referenceYear={referenceYear}
-        onReferenceMonthChange={handleReferenceMonthChange}
-        onReferenceYearChange={handleReferenceYearChange}
+        selectedMonth={selectedMonth}
+        displayMonth={displayMonth}
+        availableMonths={availableMonths}
+        onSelectMonth={handleSelectMonth}
         onExit={handleExitPresentation}
       />
     );
@@ -247,23 +230,25 @@ export default function App() {
           viewMode={viewMode}
           onViewModeChange={setViewMode}
           isLoading={isLoading}
-          isUsingSampleData={isUsingSampleData}
+          hasError={!!fetchError}
         />
 
         <PageHead
-          referenceMonth={referenceMonth}
-          onReferenceMonthChange={handleReferenceMonthChange}
-          onRefresh={() => fetchData()}
+          selectedMonth={selectedMonth}
+          displayMonth={displayMonth}
+          availableMonths={availableMonths}
+          onSelectMonth={handleSelectMonth}
+          onRefresh={() => fetchData(selectedMonth)}
           isLoading={isLoading}
           onStartPresentation={handleStartPresentation}
         />
 
-        {/* Modo apresentação (tela cheia) */}
+        {/* Modo apresentação (tela cheia) banner */}
         {isFullscreen && (
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-full bg-q-green px-5 py-2.5 text-xs font-semibold text-white">
             <span className="flex items-center gap-2">
               <Tv className="size-4" />
-              Modo Apresentação • Reunião de Resultados e Reconhecimentos
+              Modo Reunião • Tela Cheia Ativa
             </span>
             <span className="font-medium text-white/75">Pressione Esc para sair</span>
           </div>
@@ -276,112 +261,117 @@ export default function App() {
             onMetricSelect={setActiveMetricKey}
             isFullscreen={isFullscreen}
             onToggleFullscreen={handleToggleFullscreen}
-            onOpenSettings={() => setShowSettingsModal(true)}
             onStartPresentation={handleStartPresentation}
           />
 
           <main className="min-w-0 flex-1">
-            {/* Aviso de erro */}
-            {fetchErrors.length > 0 && (
-              <div className="mb-4 flex flex-col items-start justify-between gap-3 rounded-q-card bg-[#fdeee3] p-4 text-[#a0460a] sm:flex-row sm:items-center">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="mt-0.5 size-5 shrink-0 text-[#e07020]" />
-                  <div>
-                    <p className="m-0 text-sm font-bold">Aviso na leitura da planilha:</p>
-                    <p className="m-0 mt-0.5 text-xs">{fetchErrors[0]}</p>
-                    <p className="m-0 mt-1 text-[11px] text-[#a0460a]/75">
-                      Exibindo conjunto de segurança com dados da operação técnica.
-                    </p>
-                  </div>
+            {/* Mensagem de Erro bem visível sem dados antigos */}
+            {fetchError ? (
+              <div className="rounded-q-card bg-q-card border-2 border-[#fca5a5] p-8 sm:p-12 text-center shadow-lg my-4">
+                <div className="mx-auto mb-4 grid size-16 place-items-center rounded-full bg-[#fee2e2] text-[#dc2626]">
+                  <AlertCircle className="size-8" strokeWidth={2.3} />
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setShowSettingsModal(true)} className="shrink-0">
-                  Verificar Conexão
-                </Button>
+                <h2 className="text-xl sm:text-2xl font-black text-q-ink m-0">
+                  Falha ao conectar ao banco Supabase
+                </h2>
+                <p className="mt-2 text-sm text-[#b91c1c] font-semibold max-w-lg mx-auto">
+                  {fetchError}
+                </p>
+                <p className="mt-1 text-xs text-q-muted max-w-md mx-auto">
+                  Verifique a conexão de rede ou a disponibilidade da API REST.
+                </p>
+                <button
+                  onClick={() => fetchData(selectedMonth)}
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-q-green px-6 py-3 text-sm font-bold text-white hover:bg-q-green-deep cursor-pointer transition-all shadow-md hover:scale-105 active:scale-95"
+                >
+                  <RefreshCw className="size-4" />
+                  <span>Tentar novamente</span>
+                </button>
               </div>
-            )}
+            ) : (
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+                {/* Destaque do Mês (cartão verde) */}
+                {hasHighlight && (
+                  <div className="lg:col-span-8">
+                    <MonthHighlight
+                      highlight={monthHighlight}
+                      referenceMonth={displayMonth}
+                      isOperations={isOperations}
+                    />
+                  </div>
+                )}
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-              {/* Destaque do Mês (cartão verde) */}
-              {hasHighlight && (
-                <div className="lg:col-span-8">
-                  <MonthHighlight
-                    highlight={monthHighlight}
-                    referenceMonth={referenceMonth}
-                    isOperations={isOperations}
+                {/* Resumo da categoria */}
+                <div
+                  className={`grid grid-cols-1 gap-4 sm:grid-cols-3 ${
+                    hasHighlight ? "lg:col-span-4 lg:grid-cols-1" : "lg:col-span-12"
+                  }`}
+                >
+                  <StatCard
+                    icon={<Award className="size-5" strokeWidth={2.3} />}
+                    label="Líder da categoria"
+                    value={categoryStats?.leader ? categoryStats.leader.displayNome : "—"}
+                    badge={categoryStats?.leader?.formattedValue}
+                  />
+                  <StatCard
+                    icon={<TrendingUp className="size-5" strokeWidth={2.3} />}
+                    label="Média da operação"
+                    value={categoryStats?.averageFormatted || "—"}
+                  />
+                  <StatCard
+                    icon={<Users className="size-5" strokeWidth={2.3} />}
+                    label="Participantes avaliados"
+                    value={`${categoryStats?.totalParticipants || 0} ${isOperations ? "operações" : "angels"}`}
                   />
                 </div>
-              )}
 
-              {/* Resumo da categoria */}
-              <div
-                className={`grid grid-cols-1 gap-4 sm:grid-cols-3 ${
-                  hasHighlight ? "lg:col-span-4 lg:grid-cols-1" : "lg:col-span-12"
-                }`}
-              >
-                <StatCard
-                  icon={<Award className="size-5" strokeWidth={2.3} />}
-                  label="Líder da categoria"
-                  value={categoryStats?.leader ? categoryStats.leader.displayNome : "—"}
-                  badge={categoryStats?.leader?.formattedValue}
-                />
-                <StatCard
-                  icon={<TrendingUp className="size-5" strokeWidth={2.3} />}
-                  label="Média da operação"
-                  value={categoryStats?.averageFormatted || "—"}
-                />
-                <StatCard
-                  icon={<Users className="size-5" strokeWidth={2.3} />}
-                  label="Participantes avaliados"
-                  value={`${categoryStats?.totalParticipants || 0} ${isOperations ? "operações" : "angels"}`}
-                />
+                {isLoading ? (
+                  <div className="flex flex-col items-center justify-center rounded-q-card bg-q-card py-20 lg:col-span-12 shadow-xs border border-q-line">
+                    <div className="mb-4 size-11 animate-spin rounded-full border-4 border-q-green-tint border-t-q-green" />
+                    <p className="m-0 text-sm font-bold text-q-ink">Sincronizando com o Supabase...</p>
+                    <p className="m-0 mt-1 text-xs text-q-muted">Carregando métricas e fotos em alta resolução</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="lg:col-span-12">
+                      <Podium items={rankedItems} metric={currentMetric} isOperations={isOperations} />
+                    </div>
+                    <div className="lg:col-span-5">
+                      <RankingChart items={rankedItems} metric={currentMetric} />
+                    </div>
+                    <div className="lg:col-span-7">
+                      <RankingList items={rankedItems} metric={currentMetric} isOperations={isOperations} />
+                    </div>
+                  </>
+                )}
               </div>
-
-              {isLoading ? (
-                <div className="flex flex-col items-center justify-center rounded-q-card bg-q-card py-20 lg:col-span-12">
-                  <div className="mb-4 size-11 animate-spin rounded-full border-4 border-q-green-tint border-t-q-green" />
-                  <p className="m-0 text-sm font-medium text-q-muted">Carregando dados da competição...</p>
-                </div>
-              ) : (
-                <>
-                  <div className="lg:col-span-12">
-                    <Podium items={rankedItems} metric={currentMetric} isOperations={isOperations} />
-                  </div>
-                  <div className="lg:col-span-5">
-                    <RankingChart items={rankedItems} metric={currentMetric} />
-                  </div>
-                  <div className="lg:col-span-7">
-                    <RankingList items={rankedItems} metric={currentMetric} isOperations={isOperations} />
-                  </div>
-                </>
-              )}
-            </div>
+            )}
           </main>
         </div>
 
-        <footer className="mt-4 py-4 text-center text-xs text-q-muted">
+        {/* Rodapé com data e hora da atualização */}
+        <footer className="mt-6 py-4 text-center text-xs text-q-muted border-t border-q-line/60">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 sm:flex-row">
-            <p className="m-0">© {new Date().getFullYear()} Stone • Resultados e Reconhecimentos do Atendimento Técnico</p>
+            <p className="m-0 font-medium">
+              {lastUpdated ? (
+                <>
+                  <span className="inline-block size-2 rounded-full bg-q-green mr-2 align-middle" />
+                  Dados atualizados em {formatUpdateDateTime(lastUpdated)}
+                </>
+              ) : (
+                "Carregando dados..."
+              )}
+            </p>
             <div className="flex items-center gap-4">
-              <button onClick={() => setShowSettingsModal(true)} className="cursor-pointer transition-colors hover:text-q-green">
-                Configurar Planilha
-              </button>
-              <span>•</span>
-              <button onClick={handleToggleFullscreen} className="cursor-pointer transition-colors hover:text-q-green">
+              <button
+                onClick={handleToggleFullscreen}
+                className="cursor-pointer transition-colors hover:text-q-green font-semibold"
+              >
                 {isFullscreen ? "Sair da Tela Cheia" : "Tela Cheia"}
               </button>
             </div>
           </div>
         </footer>
-
-        <SheetSettingsModal
-          isOpen={showSettingsModal}
-          onClose={() => setShowSettingsModal(false)}
-          currentSpreadsheetId={spreadsheetId}
-          onSave={handleSaveSpreadsheet}
-          onResetToSample={handleResetToSample}
-          isUsingSampleData={isUsingSampleData}
-          errors={fetchErrors}
-        />
       </div>
     </div>
   );

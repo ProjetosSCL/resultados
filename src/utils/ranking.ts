@@ -200,13 +200,17 @@ export function calculateMonthHighlight(
   // Ordena pelo critério:
   // 1. Mais aparições no pódio (totalPodiums)
   // 2. Mais 1º lugares
-  // 3. Maior pontuação ponderada (score)
+  // 3. Mais 2º lugares
+  // 4. Maior pontuação ponderada (score)
   candidates.sort((a, b) => {
     if (b.totalPodiums !== a.totalPodiums) {
       return b.totalPodiums - a.totalPodiums;
     }
     if (b.firstPlaceCount !== a.firstPlaceCount) {
       return b.firstPlaceCount - a.firstPlaceCount;
+    }
+    if (b.secondPlaceCount !== a.secondPlaceCount) {
+      return b.secondPlaceCount - a.secondPlaceCount;
     }
     return b.score - a.score;
   });

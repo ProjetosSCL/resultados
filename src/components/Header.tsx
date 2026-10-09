@@ -6,7 +6,7 @@ interface HeaderProps {
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
   isLoading: boolean;
-  isUsingSampleData: boolean;
+  hasError?: boolean;
 }
 
 const MODES: { key: ViewMode; label: string; Icon: typeof Building2 }[] = [
@@ -16,23 +16,23 @@ const MODES: { key: ViewMode; label: string; Icon: typeof Building2 }[] = [
 
 /**
  * Barra superior no estilo Quixotic: pill branca com logo, switcher
- * Operações / Green Angels (nav2) e chip de status da planilha.
+ * Operações / Green Angels (nav2) e chip de status da conexão Supabase.
  */
 export const Header: React.FC<HeaderProps> = ({
   viewMode,
   onViewModeChange,
   isLoading,
-  isUsingSampleData,
+  hasError = false,
 }) => {
   const statusLabel = isLoading
     ? "Sincronizando…"
-    : isUsingSampleData
-      ? "Dados de amostra"
-      : "Planilha conectada";
+    : hasError
+      ? "Erro de conexão"
+      : "Supabase conectado";
   const dotClass = isLoading
     ? "bg-q-muted animate-pulse"
-    : isUsingSampleData
-      ? "bg-[#FF8232]"
+    : hasError
+      ? "bg-[#F54141]"
       : "bg-q-green";
 
   return (

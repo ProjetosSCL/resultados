@@ -19,7 +19,6 @@ interface RailProps {
   onMetricSelect: (key: MetricKey) => void;
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
-  onOpenSettings: () => void;
   onStartPresentation?: () => void;
 }
 
@@ -61,7 +60,7 @@ const RailButton: React.FC<RailButtonProps> = ({ label, active, onClick, childre
 
 /**
  * Rail lateral: grupo 1 seleciona a métrica ativa; grupo 2 reúne
- * tela cheia e configuração da planilha. No mobile vira uma barra horizontal.
+ * apresentação e tela cheia. No mobile vira uma barra horizontal.
  */
 export const Rail: React.FC<RailProps> = ({
   metrics,
@@ -69,7 +68,6 @@ export const Rail: React.FC<RailProps> = ({
   onMetricSelect,
   isFullscreen,
   onToggleFullscreen,
-  onOpenSettings,
   onStartPresentation,
 }) => {
   const group =
@@ -115,9 +113,6 @@ export const Rail: React.FC<RailProps> = ({
           ) : (
             <Maximize2 className="size-5" strokeWidth={2.1} />
           )}
-        </RailButton>
-        <RailButton label="Configurar planilha" onClick={onOpenSettings}>
-          <Settings className="size-5" strokeWidth={2.1} />
         </RailButton>
       </div>
     </aside>

@@ -16,6 +16,7 @@ import {
   UserCheck,
   Calendar,
   Play,
+  ChevronDown,
 } from "lucide-react";
 import {
   OperationRow,
@@ -29,15 +30,16 @@ import { calculateRanking, calculateMonthHighlight } from "../utils/ranking";
 import { AvatarPhoto } from "./AvatarPhoto";
 import { triggerConfetti, triggerGoldenFireworks } from "../utils/confetti";
 import { AssetChip, Button } from "./stone-ds";
+import { formatMonthDisplay } from "../services/supabaseService";
 
 interface PresentationModeProps {
   operacoes: OperationRow[];
   angels: AngelRow[];
   fotosMap: Map<string, string>;
-  referenceMonth: string;
-  referenceYear?: string;
-  onReferenceMonthChange?: (month: string) => void;
-  onReferenceYearChange?: (year: string) => void;
+  selectedMonth: string;
+  displayMonth: string;
+  availableMonths: string[];
+  onSelectMonth: (month: string) => void;
   onExit: () => void;
 }
 
@@ -88,37 +90,13 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   operacoes,
   angels,
   fotosMap,
-  referenceMonth,
-  referenceYear = String(new Date().getFullYear()),
-  onReferenceMonthChange,
-  onReferenceYearChange,
+  selectedMonth,
+  displayMonth,
+  availableMonths,
+  onSelectMonth,
   onExit,
 }) => {
-  // Estado local sincronizado de mês e ano para Capa 1
-  const [localMonth, setLocalMonth] = useState<string>(() => {
-    return localStorage.getItem("presentation_month") || referenceMonth || "Agosto";
-  });
-  const [localYear, setLocalYear] = useState<string>(() => {
-    return localStorage.getItem("presentation_year") || referenceYear || String(new Date().getFullYear());
-  });
-
-  const handleUpdateMonth = (newMonth: string) => {
-    setLocalMonth(newMonth);
-    localStorage.setItem("presentation_month", newMonth);
-    if (onReferenceMonthChange) {
-      onReferenceMonthChange(newMonth);
-    }
-  };
-
-  const handleUpdateYear = (newYear: string) => {
-    setLocalYear(newYear);
-    localStorage.setItem("presentation_year", newYear);
-    if (onReferenceYearChange) {
-      onReferenceYearChange(newYear);
-    }
-  };
-
-  const formattedPeriod = `${localMonth} de ${localYear}`;
+  const formattedPeriod = displayMonth;
 
   // Pre-calculate metric definitions
   const operacoesMetrics = useMemo(() => METRICS, []);
@@ -569,7 +547,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
 
               {/* Prominent Month & Year Highlight */}
               <div className="mt-3 mb-6 text-3xl sm:text-5xl font-black text-q-green tracking-tight">
-                {localMonth} de {localYear}
+                {displayMonth}
               </div>
 
               {/* Period Selector Card */}
@@ -577,48 +555,28 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                 onClick={(e) => e.stopPropagation()}
                 className="w-full max-w-md bg-q-soft rounded-2xl p-4 sm:p-5 border border-q-line shadow-inner mb-6 text-left"
               >
-                <div className="flex items-center gap-2 text-xs font-bold text-q-muted uppercase tracking-wider mb-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-q-muted uppercase tracking-wider mb-2.5">
                   <Calendar className="size-4 text-q-green" />
-                  <span>Escolha o Mês e Ano de Referência:</span>
+                  <span>Mês de Referência Publicado:</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Seletor de Mês */}
-                  <div>
-                    <label className="block text-[11px] font-bold text-q-ink mb-1">
-                      Mês:
-                    </label>
-                    <select
-                      value={localMonth}
-                      onChange={(e) => handleUpdateMonth(e.target.value)}
-                      className="w-full rounded-xl bg-q-card border border-q-line px-3 py-2 text-sm font-bold text-q-ink focus:outline-none focus:ring-2 focus:ring-q-green cursor-pointer shadow-sm"
-                    >
-                      {MONTH_OPTIONS.map((m) => (
-                        <option key={m} value={m}>
-                          {m}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Campo de Ano */}
-                  <div>
-                    <label className="block text-[11px] font-bold text-q-ink mb-1">
-                      Ano:
-                    </label>
-                    <input
-                      type="number"
-                      value={localYear}
-                      onChange={(e) => handleUpdateYear(e.target.value)}
-                      min={2020}
-                      max={2035}
-                      className="w-full rounded-xl bg-q-card border border-q-line px-3 py-2 text-sm font-bold text-q-ink focus:outline-none focus:ring-2 focus:ring-q-green shadow-sm"
-                    />
-                  </div>
+                <div className="relative">
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => onSelectMonth(e.target.value)}
+                    className="w-full rounded-xl bg-q-card border border-q-line px-4 py-3 text-sm font-bold text-q-ink focus:outline-none focus:ring-2 focus:ring-q-green cursor-pointer shadow-sm appearance-none pr-9"
+                  >
+                    {availableMonths.map((m) => (
+                      <option key={m} value={m} className="font-semibold text-q-ink bg-white">
+                        {formatMonthDisplay(m)}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 size-4 text-q-muted" strokeWidth={2.2} />
                 </div>
 
                 <p className="text-[11px] text-q-muted mt-2.5 mb-0 font-medium">
-                  ✓ O período selecionado será salvo no navegador e aplicado em todos os títulos e destaques.
+                  ✓ O mês escolhido alimenta a apresentação, pódios e o Destaque do Mês.
                 </p>
               </div>
 
